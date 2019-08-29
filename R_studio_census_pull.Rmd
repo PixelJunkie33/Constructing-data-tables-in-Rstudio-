@@ -1,0 +1,76 @@
+---
+title: "Pulling data from Census.gov"
+output: html_notebook
+---
+
+
+```{r}
+#this step sets up api key
+## Add key to .Renviron
+Sys.setenv(census_key="0e248ede36e8968de7299d9ef9696703ef00eb60")
+#Check to see that the expected key is output in your R console
+Sys.getenv("0e248ede36e8968de7299d9ef9696703ef00eb60")
+```
+```{r} 
+          
+apis <- listCensusApis()
+View(apis)
+```
+```{r}
+sahie_vars <-listCensusMetadata(name = "timeseries/healthins/sahie", type = "variables")
+head(sahie_vars)
+```
+```{r}
+  # VAriables to for sahie api by group
+#IPRCAT: Income Poverty Ratio Category
+#IPR_DESC: Income Poverty Ratio Category Description
+#PCTUI_PT: Percent Uninsured in Demographic Group for Selected Income Range, Estimate
+#NAME: Name of the geography returned (e.g. state or county name)
+
+#National Level
+sahie_nat <-getCensus(name = "timeseries/healthins/sahie",
+vars = c("NAME", "IPR_DESC", "IPRCAT", "PCTUI_PT"),
+region = "us:*",
+time = 2015)
+head(sahie_nat, n=200L)
+write.csv(sahie_nat, file = "sahie_nat.csv",row.names=TRUE)
+```
+```{r}
+#state level ###Orginal Line 
+#sahie_states<- getCensus(name= "timeseries/healthins/sahie",
+#vars = c("NAME", "IPR_DESC", "IPRCAT", "PCTUI_PT"), region = "state:*", time = 2016)
+#head(sahie_states)
+
+#state level 
+sahie_states<- getCensus(name= "timeseries/healthins/sahie",
+  vars = c("NAME", "IPR_DESC", "IPRCAT", "PCTUI_PT"),
+  region = "state:*",
+  time = 2016)
+  head(sahie_states, n=200L)
+write.csv(sahie_states, file = "sahie_states.csv",row.names=FALSE)
+```
+```{r}
+#county level
+sahie_counties <- getCensus(name = "timeseries/healthins/sahie",
+    vars = c("NAME", "IPRCAT", "IPR_DESC", "PCTUI_PT"), 
+    region = "county:*", 
+    regionin = "state:34,39", 
+    time = 2016)
+head(sahie_counties, n=200L)
+write.csv(sahie_counties, file = "sahie_counties.csv",row.names=FALSE)
+```
+```{r}
+##Times series of sahie data 
+sahie_years<- getCensus(name = "timeseries/healthins/sahie",
+  vars = c("NAME", "IPR_DESC", "PCTUI_PT"),
+  region = "county:*",
+  regionin = "state:34,39",
+  time = "from 2006 to 2016") 
+head(sahie_years, n=200L)
+write.csv(sahie_years, file = "sahie_years.csv",row.names=FALSE)
+```
+
+
+
+
+
